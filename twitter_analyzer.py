@@ -186,31 +186,3 @@ if __name__ == '__main__':
 
     keywords = "corona OR covid" # -filter:retweets"
     BotFunctions.tweet_word_cloud(100, keywords)
-
-    #stream.filter(track = []) (filtering)
-    
-    #tweets = api.get_random_tweets()
-    #print(twitter_client.get_random_tweets(1))
-
-    #print(dir(tweets[0]))
-    #print(tweets[0].retweet_count)
-    #twitter_client.tweet("Hello World")
-
-    #tweets = api.user_timeline(screen_name="JoeBiden", count=20)
-    # keywords = "corona OR covid" # -filter:retweets"
-    # tweets = twitter_client.get_today_tweets(100, keywords)
-    # df = tweet_analyzer.tweets_to_data_frame(tweets)
-    
-    # print(df.head(10))
-
-    # str = df.text.to_string()
-    # wordcloud = word_cloud.make_word_cloud(str)
-
-    #path = "C:\Users\richa\Desktop\Twitter\"
-    # wordcloud.to_file(os.path.join("./testing", "testcloud2.png"))
-    
-    # tweet the wordcloud that was made
-    # twitter_client.tweet("testwordcloud", "./testing/testcloud2.png")
-
-    # this plots the word cloud so I can see it
-    # word_cloud.plot_word_cloud(wordcloud)
