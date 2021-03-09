@@ -53,10 +53,13 @@ class TwitterClient():
     def get_today_tweets(self, num_tweets, search_terms):
         tweets = []
         start_date = datetime.now() - timedelta(days=1)
-        start_time = start_date.strftime("%Y-%m-%dT%H:%M:%SZ")
-        # q = since:until?
-        for tweet in Cursor(self.twitter_client.search, q = search_terms + " since:" + start_time,
-         lang = "en", start_time = start_time).items(num_tweets): 
+        # get tommorows date (when we should stop getting more tweets)
+        tmr = datetime.today() + timedelta(days=1)
+        tmr_str = today.strftime("%d-%m-%Y")
+        # start_time = start_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+        # start_time = start_date.strftime("%Y-%m-%d")
+        for tweet in Cursor(self.twitter_client.search, q = search_terms,
+         lang = "en").items(num_tweets): 
             tweets.append(tweet)
         return tweets
 
@@ -157,7 +160,7 @@ class PlotWordCloud():
 class BotFunctions():
     # makes a tweets a daily wordcloud
     # gets count number of tweets and filters by keywords
-    def tweet_word_cloud(count, keywords):
+    def tweet_word_cloud(str):
         # including other classes to be used later
         twitter_client = TwitterClient()
         tweet_analyzer = TweetAnalyzer()
@@ -167,25 +170,9 @@ class BotFunctions():
         # get today's date (for naming the wordcloud)
         today = datetime.today()
         today_str = today.strftime("%d-%m-%Y")
-
         # gives the exact time, used to make wordclouds while testing unique
         now = datetime.now()
         now = now.strftime("%H.%M.%S")
-
-        # get tweets
-        tweets = twitter_client.get_today_tweets(count, keywords)
-        # store tweets into data frame
-        df = tweet_analyzer.tweets_to_data_frame(tweets)
-
-        # print dataframe for debugging purposes
-        # print(df.head(10))
-
-        # extracting only the contents of the tweet
-        str = df.text.to_string()
-        # remove twitter handles (starting with @), replaces it with empty string
-        # removing RT in stopwords (see make_word_cloud function)
-        str = re.sub("@\w[\w']+", "", str) 
-        # print(str)
 
         cloud_name = "testcloud" + now + today_str + ".png"
 
@@ -207,4 +194,21 @@ if __name__ == '__main__':
     api = twitter_client.get_twitter_client_api()
 
     keywords = "corona OR covid" # -filter:retweets"
-    BotFunctions.tweet_word_cloud(100, keywords)
+
+    # get tweets, uses UTC timezone
+    tweets = twitter_client.get_today_tweets(100, keywords)
+    # store tweets into data frame
+    df = tweet_analyzer.tweets_to_data_frame(tweets)
+
+    # print dataframe for debugging purposes
+    # print(df.head(10))
+    print(df['date'])
+
+    # extracting only the contents of the tweet
+    str = df.text.to_string()
+    # remove twitter handles (starting with @), replaces it with empty string
+    # removing RT in stopwords (see make_word_cloud function)
+    str = re.sub("@\w[\w']+", "", str) 
+    # print(str)
+
+    BotFunctions.tweet_word_cloud(str)
