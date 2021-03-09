@@ -4,7 +4,7 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 from wordcloud import WordCloud, STOPWORDS
-from datetime import date
+from datetime import datetime, timedelta
 
 import os.path
 import tweepy
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import twitter_credentials
 import numpy as np
 import pandas as pd
-
+import re
 
 # # # # TWITTER CLIENT # # # #
 class TwitterClient():
@@ -52,9 +52,11 @@ class TwitterClient():
 
     def get_today_tweets(self, num_tweets, search_terms):
         tweets = []
-        #today = 
-        for tweet in Cursor(self.twitter_client.search, q = search_terms, lang = "en").items(num_tweets):
-            #if tweet.created_at 
+        start_date = datetime.now() - timedelta(days=1)
+        start_time = start_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+        # q = since:until?
+        for tweet in Cursor(self.twitter_client.search, q = search_terms + " since:" + start_time,
+         lang = "en", start_time = start_time).items(num_tweets): 
             tweets.append(tweet)
         return tweets
 
@@ -135,7 +137,7 @@ class TweetAnalyzer():
 class PlotWordCloud():
     # create and plots word cloud from passed str
     def make_word_cloud(self, str):
-        stopwords = ["RT"] + list(STOPWORDS) 
+        stopwords = ["RT", "https", "http"] + list(STOPWORDS) 
         wordcloud = WordCloud(width = 800, height = 800, 
                     background_color ='white', 
                     stopwords = stopwords, 
@@ -163,18 +165,29 @@ class BotFunctions():
         api = twitter_client.get_twitter_client_api()
 
         # get today's date (for naming the wordcloud)
-        today = date.today()
+        today = datetime.today()
         today_str = today.strftime("%d-%m-%Y")
+
+        # gives the exact time, used to make wordclouds while testing unique
+        now = datetime.now()
+        now = now.strftime("%H.%M.%S")
 
         # get tweets
         tweets = twitter_client.get_today_tweets(count, keywords)
         # store tweets into data frame
         df = tweet_analyzer.tweets_to_data_frame(tweets)
 
+        # print dataframe for debugging purposes
+        # print(df.head(10))
+
         # extracting only the contents of the tweet
         str = df.text.to_string()
+        # remove twitter handles (starting with @), replaces it with empty string
+        # removing RT in stopwords (see make_word_cloud function)
+        str = re.sub("@\w[\w']+", "", str) 
+        # print(str)
 
-        cloud_name = "testcloud" + today_str + ".png"
+        cloud_name = "testcloud" + now + today_str + ".png"
 
         # make the word cloud and store it on computer
         # path = "C:\Users\richa\Desktop\Twitter\"
