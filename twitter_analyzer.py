@@ -4,6 +4,7 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 from wordcloud import WordCloud, STOPWORDS
+from datetime import date
 
 import os.path
 import tweepy
@@ -161,6 +162,10 @@ class BotFunctions():
         word_cloud = PlotWordCloud()
         api = twitter_client.get_twitter_client_api()
 
+        # get today's date (for naming the wordcloud)
+        today = date.today()
+        today_str = today.strftime("%d-%m-%Y")
+
         # get tweets
         tweets = twitter_client.get_today_tweets(count, keywords)
         # store tweets into data frame
@@ -169,13 +174,17 @@ class BotFunctions():
         # extracting only the contents of the tweet
         str = df.text.to_string()
 
+        cloud_name = "testcloud" + today_str + ".png"
+
         # make the word cloud and store it on computer
         # path = "C:\Users\richa\Desktop\Twitter\"
         wordcloud = word_cloud.make_word_cloud(str)
-        wordcloud.to_file(os.path.join("./testing", "testcloud2.png"))
+        wordcloud.to_file(os.path.join("./testing", cloud_name))
     
         # tweet the wordcloud that was made
-        twitter_client.tweet("testwordcloud", "./testing/testcloud2.png")
+        twitter_client.tweet("testwordcloud " + today_str, "./testing/" + cloud_name)
+
+    #def respond_to_tweets():
 
 if __name__ == '__main__':
 
