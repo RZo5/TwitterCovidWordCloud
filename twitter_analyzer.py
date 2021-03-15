@@ -52,14 +52,13 @@ class TwitterClient():
 
     def get_today_tweets(self, num_tweets, search_terms):
         tweets = []
-        start_date = datetime.now() - timedelta(days=1)
-        # get tommorows date (when we should stop getting more tweets)
-        tmr = datetime.today() + timedelta(days=1)
-        tmr_str = today.strftime("%d-%m-%Y")
+        start_date = datetime.now() #- timedelta(days=1)
         # start_time = start_date.strftime("%Y-%m-%dT%H:%M:%SZ")
-        # start_time = start_date.strftime("%Y-%m-%d")
-        for tweet in Cursor(self.twitter_client.search, q = search_terms,
-         lang = "en").items(num_tweets): 
+        today = start_date.strftime("%Y-%m-%d") # only give tweets posted from today
+        
+        # we get a mix of popular tweets and recent (realtime) tweets
+        for tweet in Cursor(self.twitter_client.search, q = search_terms + " since:" + today,
+         lang = "en", result_type = "popular").items(num_tweets): 
             tweets.append(tweet)
         return tweets
 
@@ -140,7 +139,7 @@ class TweetAnalyzer():
 class PlotWordCloud():
     # create and plots word cloud from passed str
     def make_word_cloud(self, str):
-        stopwords = ["RT", "https", "http"] + list(STOPWORDS) 
+        stopwords = ["RT", "https", "http", "t", "u", "l", "n", "b", "s"] + list(STOPWORDS) 
         wordcloud = WordCloud(width = 800, height = 800, 
                     background_color ='white', 
                     stopwords = stopwords, 
@@ -196,7 +195,7 @@ if __name__ == '__main__':
     keywords = "corona OR covid" # -filter:retweets"
 
     # get tweets, uses UTC timezone
-    tweets = twitter_client.get_today_tweets(100, keywords)
+    tweets = twitter_client.get_today_tweets(1000, keywords)
     # store tweets into data frame
     df = tweet_analyzer.tweets_to_data_frame(tweets)
 
@@ -208,7 +207,8 @@ if __name__ == '__main__':
     str = df.text.to_string()
     # remove twitter handles (starting with @), replaces it with empty string
     # removing RT in stopwords (see make_word_cloud function)
-    str = re.sub("@\w[\w']+", "", str) 
+    str = re.sub("@\w[\w']+", "", str)
+    str = re.sub("\s\w\s", "", str) # remove single letters
     # print(str)
 
     BotFunctions.tweet_word_cloud(str)
