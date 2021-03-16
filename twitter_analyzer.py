@@ -7,13 +7,18 @@ from wordcloud import WordCloud, STOPWORDS
 from datetime import datetime, timedelta
 
 import os.path
+from os import environ
 import tweepy
 import time
 import matplotlib.pyplot as plt  
-import twitter_credentials
+# import twitter_credentials # comment out when pushing to heroku
 import numpy as np
 import pandas as pd
 import re
+CONSUMER_KEY = environ['CONSUMER_KEY']
+CONSUMER_SECRET = environ['CONSUMER_SECRET']
+ACCESS_KEY = environ['ACCESS_KEY']
+ACCESS_SECRET = environ['ACCESS_SECRET']
 
 # # # # TWITTER CLIENT # # # #
 class TwitterClient():
@@ -73,8 +78,8 @@ class TwitterClient():
 class TwitterAuthenticator():
 
     def authenticate_twitter_app(self):
-        auth = OAuthHandler(twitter_credentials.CONSUMER_KEY, twitter_credentials.CONSUMER_SECRET)
-        auth.set_access_token(twitter_credentials.ACCESS_TOKEN, twitter_credentials.ACCESS_TOKEN_SECRET)
+        auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+        auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
         return auth
 
 # # # # TWITTER STREAMER # # # #
@@ -208,4 +213,5 @@ class BotFunctions():
     #def respond_to_tweets():
 
 if __name__ == '__main__':
+    print(os.environ)
     BotFunctions().post_once_a_day()
