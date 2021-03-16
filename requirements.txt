@@ -2,7 +2,7 @@ django
 APScheduler==3.0.0
 tweepy==3.10.0
 wordcloud==1.8.1
-matplotlib.pyplot
+matplotlib==3.3.4
 numpy==1.20.1
 pandas==1.2.2
 pytz==2021.1
