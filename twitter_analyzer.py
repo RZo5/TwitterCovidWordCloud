@@ -11,7 +11,7 @@ from os import environ
 import tweepy
 import time
 import matplotlib.pyplot as plt  
-import twitter_credentials # comment out when pushing to heroku
+# import twitter_credentials # comment out when pushing to heroku
 import numpy as np
 import pandas as pd
 import re
