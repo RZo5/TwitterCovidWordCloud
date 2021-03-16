@@ -2,4 +2,3 @@ twitter_credentials.py
 twitter_credentials
 *.txt
 /.vscode
-/testing
