@@ -201,7 +201,7 @@ if __name__ == '__main__':
 
     # print dataframe for debugging purposes
     # print(df.head(10))
-    print(df['date'])
+    # print(df['date'])
 
     # extracting only the contents of the tweet
     str = df.text.to_string()
