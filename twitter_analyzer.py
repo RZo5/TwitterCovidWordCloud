@@ -159,56 +159,53 @@ class PlotWordCloud():
 class BotFunctions():
     # makes a tweets a daily wordcloud
     # gets count number of tweets and filters by keywords
-    def tweet_word_cloud(str):
+    def tweet_word_cloud(self, str):
         # including other classes to be used later
         twitter_client = TwitterClient()
-        tweet_analyzer = TweetAnalyzer()
         word_cloud = PlotWordCloud()
-        api = twitter_client.get_twitter_client_api()
 
         # get today's date (for naming the wordcloud)
         today = datetime.today()
-        today_str = today.strftime("%d-%m-%Y")
+        today_str = today.strftime("%m-%d-%Y")
         # gives the exact time, used to make wordclouds while testing unique
-        now = datetime.now()
-        now = now.strftime("%H.%M.%S")
+        # now = datetime.now()
+        # now = now.strftime("%H.%M.%S")
 
-        cloud_name = "testcloud" + now + today_str + ".png"
+        cloud_name = "wordcloud" + today_str + ".png"
 
         # make the word cloud and store it on computer
         # path = "C:\Users\richa\Desktop\Twitter\"
         wordcloud = word_cloud.make_word_cloud(str)
-        wordcloud.to_file(os.path.join("./testing", cloud_name))
+        wordcloud.to_file(os.path.join("./dailyclouds", cloud_name))
     
         # tweet the wordcloud that was made
-        twitter_client.tweet("testwordcloud " + today_str, "./testing/" + cloud_name)
+        twitter_client.tweet("Today's Covid Wordcloud: " + today_str, "./dailyclouds/" + cloud_name)
+
+    def fix_str(self, str):
+        str = re.sub("@\w[\w']+", "", str)
+        str = re.sub("\s\w\s", "", str)
+        return str
+
+    def post_once_a_day(self):
+        twitter_client = TwitterClient()
+        tweet_analyzer = TweetAnalyzer()
+
+        keywords = "corona OR covid"
+
+        # get tweets, uses UTC timezone
+        tweets = twitter_client.get_today_tweets(1000, keywords)
+        # store tweets into data frame
+        df = tweet_analyzer.tweets_to_data_frame(tweets)
+
+        # extracting only the contents of the tweet
+        str = df.text.to_string()
+        # remove twitter handles (starting with @), replaces it with empty string
+        # removing RT in stopwords (see make_word_cloud function)
+        str = BotFunctions().fix_str(str)
+
+        BotFunctions().tweet_word_cloud(str)
 
     #def respond_to_tweets():
 
 if __name__ == '__main__':
-
-    twitter_client = TwitterClient()
-    tweet_analyzer = TweetAnalyzer()
-    word_cloud = PlotWordCloud()
-    api = twitter_client.get_twitter_client_api()
-
-    keywords = "corona OR covid" # -filter:retweets"
-
-    # get tweets, uses UTC timezone
-    tweets = twitter_client.get_today_tweets(1000, keywords)
-    # store tweets into data frame
-    df = tweet_analyzer.tweets_to_data_frame(tweets)
-
-    # print dataframe for debugging purposes
-    # print(df.head(10))
-    # print(df['date'])
-
-    # extracting only the contents of the tweet
-    str = df.text.to_string()
-    # remove twitter handles (starting with @), replaces it with empty string
-    # removing RT in stopwords (see make_word_cloud function)
-    str = re.sub("@\w[\w']+", "", str)
-    str = re.sub("\s\w\s", "", str) # remove single letters
-    # print(str)
-
-    BotFunctions.tweet_word_cloud(str)
+    BotFunctions().post_once_a_day()
