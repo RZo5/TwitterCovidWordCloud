@@ -213,5 +213,4 @@ class BotFunctions():
     #def respond_to_tweets():
 
 if __name__ == '__main__':
-    print(os.environ)
     BotFunctions().post_once_a_day()
