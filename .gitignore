@@ -1,5 +1,6 @@
 twitter_credentials.py
 twitter_credentials
-*.txt
+tweep_*.txt
+tweets.txt
 /.vscode
 /__pycache__
