@@ -77,8 +77,8 @@ class TwitterAuthenticator():
         ## for heroku ##
         CONSUMER_KEY = environ['CONSUMER_KEY']
         CONSUMER_SECRET = environ['CONSUMER_SECRET']
-        ACCESS_KEY = environ['ACCESS_KEY']
-        ACCESS_SECRET = environ['ACCESS_SECRET']
+        ACCESS_KEY = environ['ACCESS_TOKEN']
+        ACCESS_SECRET = environ['ACCESS_TOKEN_SECRET']
 
         ## for local machine ##
         # CONSUMER_KEY = twitter_credentials.CONSUMER_KEY
