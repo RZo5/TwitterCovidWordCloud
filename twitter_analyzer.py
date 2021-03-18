@@ -11,7 +11,7 @@ from os import environ
 import tweepy
 import time
 import matplotlib.pyplot as plt  
-# import twitter_credentials # comment out when pushing to heroku
+#import twitter_credentials # comment out when pushing to heroku
 import numpy as np
 import pandas as pd
 import re
@@ -81,10 +81,10 @@ class TwitterAuthenticator():
         ACCESS_SECRET = environ['ACCESS_TOKEN_SECRET']
 
         ## for local machine ##
-        # CONSUMER_KEY = twitter_credentials.CONSUMER_KEY
-        # CONSUMER_SECRET = twitter_credentials.CONSUMER_SECRET
-        # ACCESS_KEY = twitter_credentials.ACCESS_TOKEN
-        # ACCESS_SECRET = twitter_credentials.ACCESS_TOKEN_SECRET
+        #CONSUMER_KEY = twitter_credentials.CONSUMER_KEY
+        #CONSUMER_SECRET = twitter_credentials.CONSUMER_SECRET
+        #ACCESS_KEY = twitter_credentials.ACCESS_TOKEN
+        #ACCESS_SECRET = twitter_credentials.ACCESS_TOKEN_SECRET
 
         auth = OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
         auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
@@ -203,8 +203,8 @@ class BotFunctions():
         twitter_client = TwitterClient()
         tweet_analyzer = TweetAnalyzer()
 
-        keywords = "corona OR covid"
-
+        keywords = "corona OR #corona OR coronavirus OR #coronavirus OR covid OR #covid OR covid19 OR #covid19 OR covid-19 OR #covid-19"
+        
         # get tweets, uses UTC timezone
         tweets = twitter_client.get_today_tweets(1000, keywords)
         # store tweets into data frame
