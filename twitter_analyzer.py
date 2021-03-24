@@ -6,6 +6,7 @@ from tweepy import Stream
 from wordcloud import WordCloud, STOPWORDS
 from datetime import datetime, timedelta
 
+import COVID19Py
 import os.path
 from os import environ
 import tweepy
@@ -151,12 +152,12 @@ class TweetAnalyzer():
 # # # # WORD CLOUD FUNCTION # # # #
 class PlotWordCloud():
     # create and plots word cloud from passed str
-    def make_word_cloud(self, str):
+    def make_word_cloud(self, cloudstr):
         stopwords = ["RT", "https", "http", "t", "u", "l", "n", "b", "s"] + list(STOPWORDS) 
         wordcloud = WordCloud(width = 800, height = 800, 
                     background_color ='white', 
                     stopwords = stopwords, 
-                    min_font_size = 10).generate(str)
+                    min_font_size = 10).generate(cloudstr)
         return wordcloud
 
     def plot_word_cloud(self, wordcloud):    
@@ -172,7 +173,7 @@ class PlotWordCloud():
 class BotFunctions():
     # makes a tweets a daily wordcloud
     # gets count number of tweets and filters by keywords
-    def tweet_word_cloud(self, str):
+    def tweet_word_cloud(self, datastr):
         # including other classes to be used later
         twitter_client = TwitterClient()
         word_cloud = PlotWordCloud()
@@ -180,6 +181,7 @@ class BotFunctions():
         # get today's date (for naming the wordcloud)
         today = datetime.today()
         today_str = today.strftime("%m-%d-%Y")
+        today_str = today.strftime("%Y-%m-%d")
         # gives the exact time, used to make wordclouds while testing unique
         # now = datetime.now()
         # now = now.strftime("%H.%M.%S")
@@ -188,16 +190,23 @@ class BotFunctions():
 
         # make the word cloud and store it on computer
         # path = "C:\Users\richa\Desktop\Twitter\"
-        wordcloud = word_cloud.make_word_cloud(str)
+        wordcloud = word_cloud.make_word_cloud(datastr)
         wordcloud.to_file(os.path.join("./dailyclouds", cloud_name))
     
-        # tweet the wordcloud that was made
-        twitter_client.tweet("Today's Covid Wordcloud: " + today_str, "./dailyclouds/" + cloud_name)
 
-    def fix_str(self, str):
-        str = re.sub("@\w[\w']+", "", str)
-        str = re.sub("\s\w\s", "", str)
-        return str
+        # covid 19 data
+        covid19 = COVID19Py.COVID19()
+        latest = covid19.getLocationByCountryCode("US")
+        confirmed_cases = latest[0]['latest']['confirmed']
+        cases_str = "{:,}".format(confirmed_cases)
+
+        # tweet the wordcloud that was made
+        twitter_client.tweet("Today's Covid Wordcloud: " + today_str + "\nConfirmed Cases (US): " + cases_str, "./dailyclouds/" + cloud_name)
+
+    def fix_str(self, my_str):
+        my_str = re.sub(r"@\w[\w']+", "", my_str)
+        my_str = re.sub(r"\s\w\s", "", my_str)
+        return my_str
 
     def post_once_a_day(self):
         twitter_client = TwitterClient()
@@ -211,12 +220,12 @@ class BotFunctions():
         df = tweet_analyzer.tweets_to_data_frame(tweets)
 
         # extracting only the contents of the tweet
-        str = df.text.to_string()
+        dfstr = df.text.to_string()
         # remove twitter handles (starting with @), replaces it with empty string
         # removing RT in stopwords (see make_word_cloud function)
-        str = BotFunctions().fix_str(str)
+        dfstr = BotFunctions().fix_str(dfstr)
 
-        BotFunctions().tweet_word_cloud(str)
+        BotFunctions().tweet_word_cloud(dfstr)
 
     #def respond_to_tweets():
 
