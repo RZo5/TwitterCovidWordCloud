@@ -181,7 +181,6 @@ class BotFunctions():
         # get today's date (for naming the wordcloud)
         today = datetime.today()
         today_str = today.strftime("%m-%d-%Y")
-        today_str = today.strftime("%Y-%m-%d")
         # gives the exact time, used to make wordclouds while testing unique
         # now = datetime.now()
         # now = now.strftime("%H.%M.%S")
@@ -192,7 +191,6 @@ class BotFunctions():
         # path = "C:\Users\richa\Desktop\Twitter\"
         wordcloud = word_cloud.make_word_cloud(datastr)
         wordcloud.to_file(os.path.join("./dailyclouds", cloud_name))
-    
 
         # covid 19 data
         covid19 = COVID19Py.COVID19()
@@ -230,4 +228,8 @@ class BotFunctions():
     #def respond_to_tweets():
 
 if __name__ == '__main__':
-    BotFunctions().post_once_a_day()
+    mystr = "hello h @hello"
+    print(mystr)
+    mystr = BotFunctions().fix_str(mystr)
+    print(mystr)
+    #BotFunctions().post_once_a_day()
