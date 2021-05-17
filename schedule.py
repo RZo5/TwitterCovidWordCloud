@@ -8,4 +8,9 @@ sched = BlockingScheduler()
 def scheduled_job():
     BotFunctions().post_once_a_day()
 
+since_id = 1
+@sched.reply('interval', minutes=1)
+def reply():
+    since_id = BotFunctions().check_mentions(since_id)
+
 sched.start()

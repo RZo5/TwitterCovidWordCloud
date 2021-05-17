@@ -16,6 +16,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import re
+import string
+import random
+
+# Global Variable
+keywords = "corona OR #corona OR coronavirus OR #coronavirus OR covid OR #covid OR covid19 OR #covid19 OR covid-19 OR #covid-19"
 
 # # # # TWITTER CLIENT # # # #
 class TwitterClient():
@@ -188,7 +193,7 @@ class BotFunctions():
         cloud_name = "wordcloud" + today_str + ".png"
 
         # make the word cloud and store it on computer
-        # path = "C:\Users\richa\Desktop\Twitter\"
+        # path = "C:\Users\...\Desktop\Twitter\"
         wordcloud = word_cloud.make_word_cloud(datastr)
         wordcloud.to_file(os.path.join("./dailyclouds", cloud_name))
 
@@ -202,17 +207,15 @@ class BotFunctions():
         twitter_client.tweet("Today's Covid Wordcloud: " + today_str + "\nConfirmed Cases (US): " + cases_str, "./dailyclouds/" + cloud_name)
 
     def fix_str(self, my_str):
-        my_str = re.sub(r"@\w[\w']+", "", my_str)
-        my_str = re.sub(r"\s\w\s", "", my_str)
+        my_str = re.sub(r"@\w[\w]+", "", my_str) # removes @
+        my_str = re.sub(r"\b\w\b", "", my_str) # removes single letters
         return my_str
 
     def post_once_a_day(self):
         twitter_client = TwitterClient()
         tweet_analyzer = TweetAnalyzer()
-
-        keywords = "corona OR #corona OR coronavirus OR #coronavirus OR covid OR #covid OR covid19 OR #covid19 OR covid-19 OR #covid-19"
         
-        # get tweets, uses UTC timezone
+        # get tweets from today (uses UTC timezone to determine what tweets is from "today")
         tweets = twitter_client.get_today_tweets(1000, keywords)
         # store tweets into data frame
         df = tweet_analyzer.tweets_to_data_frame(tweets)
@@ -225,10 +228,76 @@ class BotFunctions():
 
         BotFunctions().tweet_word_cloud(dfstr)
 
-    #def respond_to_tweets():
+    def check_mentions(since_id):
+        twitter_client = TwitterClient()
+        tweet_analyzer = TweetAnalyzer()
+
+        new_since_id = since_id
+
+        for tweet in tweepy.Cursor(tweepy.mentions_timeline, since_id=since_id).items():
+            new_since_id = max(tweet.id, new_since_id)
+            if tweet.in_reply_to_status_id is not None:
+                continue
+            #if (tweet.text.contains("")):
+
+            BotFunctions().respond_to_tweet_real(tweet.user.name)    
+
+        return new_since_id
+        
+
+    def respond_to_tweet_timeline(self, username):
+        twitter_client = TwitterClient()
+        tweet_analyzer = TweetAnalyzer()
+
+        # gets real time tweets
+        tweets = twitter_client.get_user_tweets(100, keywords) # random = recent
+        
+        # store tweets into data frame
+        df = tweet_analyzer.tweets_to_data_frame(tweets)
+
+        # extracting only the contents of the tweet
+        dfstr = df.text.to_string()
+        # remove twitter handles (starting with @), replaces it with empty string
+        # removing RT in stopwords (see make_word_cloud function)
+        dfstr = BotFunctions().fix_str(dfstr)
+
+        #BotFunctions().tweet_word_cloud(dfstr)
+        BotFunctions().tweet_rand_cloud(dfstr)
+
+    def respond_to_tweet_real(self, username):
+        twitter_client = TwitterClient()
+        tweet_analyzer = TweetAnalyzer()
+
+        # gets real time tweets
+        tweets = twitter_client.get_random_tweets(100, keywords) # random = recent
+        
+        # store tweets into data frame
+        df = tweet_analyzer.tweets_to_data_frame(tweets)
+
+        # extracting only the contents of the tweet
+        dfstr = df.text.to_string()
+        # remove twitter handles (starting with @), replaces it with empty string
+        # removing RT in stopwords (see make_word_cloud function)
+        dfstr = BotFunctions().fix_str(dfstr)
+
+        #BotFunctions().tweet_word_cloud(dfstr)
+        BotFunctions().tweet_rand_cloud(dfstr, username)
+    
+    def tweet_rand_cloud(self, datastr, username):
+        # including other classes to be used later
+        twitter_client = TwitterClient()
+        word_cloud = PlotWordCloud()
+
+        cloud_name = string.ascii_letters # random name
+        wordcloud = word_cloud.make_word_cloud(datastr)
+        wordcloud.to_file(os.path.join("./randclouds", cloud_name))
+
+        twitter_client.tweet("@" + username + "Realtime wordcloud: ", "./randclouds/" + cloud_name)
+
+
 
 if __name__ == '__main__':
-    mystr = "hello h @hello"
+    mystr = "hello h @hello d asdfhsd;aLfkhdsalf @sAd_fhsadfk allow a s a d f f q e w r q L A"
     print(mystr)
     mystr = BotFunctions().fix_str(mystr)
     print(mystr)
